@@ -164,5 +164,8 @@
         "<C-z>": false,
         "<C-y>": false,
 },
-"cmake.sourceDirectory": "C:/Uni/IKM/BALDUR/thirdParty/bullet3"
+"cmake.languageSupport.enable": true,
+"cSpell.enabled": false,
+"ltex.enabled": false,
+"latex-workshop.enabled": false
 }

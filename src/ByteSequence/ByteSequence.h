@@ -1,5 +1,40 @@
+// ----------------------------------------------------------------------------------------------------------------
+//
+//    ██████╗ ██╗   ██╗████████╗███████╗    ███████╗███████╗ ██████╗ ██╗   ██╗███████╗███╗   ██╗ ██████╗███████╗
+//    ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝    ██╔════╝██╔════╝██╔═══██╗██║   ██║██╔════╝████╗  ██║██╔════╝██╔════╝
+//    ██████╔╝ ╚████╔╝    ██║   █████╗      ███████╗█████╗  ██║   ██║██║   ██║█████╗  ██╔██╗ ██║██║     █████╗  
+//    ██╔══██╗  ╚██╔╝     ██║   ██╔══╝      ╚════██║██╔══╝  ██║▄▄ ██║██║   ██║██╔══╝  ██║╚██╗██║██║     ██╔══╝  
+//    ██████╔╝   ██║      ██║   ███████╗    ███████║███████╗╚██████╔╝╚██████╔╝███████╗██║ ╚████║╚██████╗███████╗
+//    ╚═════╝    ╚═╝      ╚═╝   ╚══════╝    ╚══════╝╚══════╝ ╚══▀▀═╝  ╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚══════╝
+// ----------------------------------------------------------------------------------------------------------------
+// MIT License
+//
+// Copyright (c) 2025-2026 Tim Rother, Dr. Hendrik Geisler
+// 
+// All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// ---------------------------------------------------------------------------------
+                                                                                                  
 #pragma once
 
+// Std Includes
 #include <type_traits>
 #include <vector>
 #include <map>
@@ -8,67 +43,59 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
-#include <boost/pfr.hpp>
 #include <cassert>
 #include <memory>
 #include <cstring>
 
-namespace fs = std::filesystem;
+// External
+#include <boost/pfr.hpp>
 
+// Decls
+namespace fs = std::filesystem;
 typedef uint8_t Byte;
 
+// Assertion Handler:
 //
+// connect a Funktion wich provides your case-specific Assertion Logging
+// if no Funktion is connected the output will be provided via stdout
+//
+// For Example:
+// 
+// static void triggerAssertHandler(const char* message){
+    
+//     RETURNING_ASSERT(TRIGGER_ASSERT, message,);
+// }
+//
+// G_BYTESEQ_ASSERT_HANDLER = triggerAssertHandler;
+
+// Function Pointer as Handler
 inline void (*G_BYTESEQ_ASSERT_HANDLER)(const char* message) = nullptr;
 
+// Helper Makros
 template <typename T, template <typename...> class Template>
 struct IsInstanceOf : std::false_type {};
 
 template <template <typename...> class Template, typename... Args>
 struct IsInstanceOf<Template<Args...>, Template> : std::true_type {};
 
-// die Aufrufe der Member Attribute müssen per member.ATTRIB abgesetzt werden
-#define OVERRIDE_BYTESEQUENZ_SERIALIZATION(STRUCTURE, INSERT_LOGIK, EXTRACT_LOGIK) \
-    template<>\
-    void ByteSequence::insert<STRUCTURE>(const STRUCTURE& member) {\
-        INSERT_LOGIK;\
-    }\
-    \
-    template<>\
-    void ByteSequence::extract<STRUCTURE>(STRUCTURE& member) {\
-        EXTRACT_LOGIK;\
-    }
+// The following templates check whether the functions `to` and `fromByteSequence`
+// exist for the corresponding types or whether the types have these functions as attributes
+// Accordingly, in template-based logic, `if constexpr` can be used to check whether these functions
+// have been defined for the corresponding types, and if so, they can then be executed
 
-// die Aufrufe der Member Attribute müssen per member.ATTRIB abgesetzt werden
-#define OVERRIDE_BYTESEQUENZ_SERIALIZATION_INLINE(STRUCTURE, INSERT_LOGIK, EXTRACT_LOGIK) \
-    template<>\
-    inline void ByteSequence::insert<STRUCTURE>(const STRUCTURE& member) {\
-        INSERT_LOGIK;\
-    }\
-    \
-    template<>\
-    inline void ByteSequence::extract<STRUCTURE>(STRUCTURE& member) {\
-        EXTRACT_LOGIK;\
-    }
+// SFINAE (Substitution Failure Is Not An Error) is a template logic in C++
+// that allows you to check whether a type has certain functions or attributes
+// without the compiler throwing an error if they are not present.
+// This means that if the substitution fails when attempting to use a function or a member,
+// it is simply ignored and not treated as an error.
+// Thus, in template logic using `if constexpr` or template specializations,
+// you can easily check whether a function or a member exists,
+// and only then execute the corresponding code.
 
+// fwddecl
 struct ByteSequence;
 
-// SFINAE templates
-
-// Folgende Templates prüfen ob es für entsprechende Typen die Funktionen to und fromByteSequenz
-// gibt oder ob die Typen diese Funktionen als attribute haben
-// dementsprechend kann in template basierten Logiken mit if constexpr gechekt werden ob diese Funktionen
-// für die entsprechende Typen definiert worden sind und für diesen Fall können sie dann ausgeführt werden
-
-// SFINAE (Substitution Failure Is Not An Error) ist eine Template Logik in C++,
-// mit der man prüfen kann, ob ein Typ bestimmte Funktionen oder Attribute besitzt,
-// ohne dass der Compiler dabei Fehler wirft, wenn sie nicht vorhanden sind.
-// Das heißt, wenn beim Versuch, eine Funktion oder ein Member zu verwenden, die Substitution 
-// fehlschlägt, wird das einfach ignoriert und nicht als Fehler gewertet.
-// So kann man in Template-Logiken mit if constexpr oder template-Spezialisierungen 
-// einfach checken, ob eine Funktion oder ein Member existiert,
-// und nur dann entsprechenden Code ausführen.
-
-//
+// Checks for Memberfunctions
 template<typename, typename = std::void_t<>>
 struct hasFromByteSequenceAttrib : std::false_type {};
 
@@ -77,7 +104,7 @@ struct hasFromByteSequenceAttrib<T, std::void_t<
     decltype(std::declval<T&>().fromByteSequence(std::declval<ByteSequence&>()))
 >> : std::true_type {};
 
-//
+// Checks for independent Functions
 template<typename, typename = std::void_t<>>
 struct hasToByteSequenceAttrib : std::false_type {};
 
@@ -104,18 +131,46 @@ struct hasToByteSequence<T, std::void_t<
     decltype(toByteSequence(std::declval<const T&>(), std::declval<ByteSequence&>()))
 >> : std::true_type {};
 
+// Macros that can be used to override the ByteSequence interaction with a specific structure
+// In most specific cases, the functions fromByteSequence / toByteSequence or
+// member.fromByteSequence / member.toByteSequence are more suitable 
+
+// Calls to member attributes must be made using member.ATTRIB
+#define OVERRIDE_BYTESEQUENZ_SERIALIZATION(STRUCTURE, INSERT_LOGIK, EXTRACT_LOGIK) \
+    template<>\
+    void ByteSequence::insert<STRUCTURE>(const STRUCTURE& member) {\
+        INSERT_LOGIK;\
+    }\
+    \
+    template<>\
+    void ByteSequence::extract<STRUCTURE>(STRUCTURE& member) {\
+        EXTRACT_LOGIK;\
+    }
+
+// Calls to member attributes must be made using member.ATTRIB
+#define OVERRIDE_BYTESEQUENZ_SERIALIZATION_INLINE(STRUCTURE, INSERT_LOGIK, EXTRACT_LOGIK) \
+    template<>\
+    inline void ByteSequence::insert<STRUCTURE>(const STRUCTURE& member) {\
+        INSERT_LOGIK;\
+    }\
+    \
+    template<>\
+    inline void ByteSequence::extract<STRUCTURE>(STRUCTURE& member) {\
+        EXTRACT_LOGIK;\
+    }
+
 // # ByteSequence
-// Bei folgender ByteSequenz werden extract und insert solange rekursiv aufgerufen bis die aufgeschlüsselten Member statische Größen aufweisen
-// und dann per Memcopy ein/ausgefügt
-// so kann jede beliebige Structur zb. vector<vector<vector<vector<int>>>> eingefügt/extrahiert werden so lange das verhalten für vector definiert ist
-// zudem können für eigene Klassen über eine eigene Insert/Extract logik die Verarbeitung von Klassenmembern mit dynamischen Atrributen
-// auf eine Aufruf in Reihenfolge umgemodelt werden
-// Dabei kann auf standardtypen wie std::vector oder std::map zugegriffen werden
-// Für diese ist bereits eine Logik implementiert
-// Diese Logik definition bzw. Überschreibung des Standardverhaltens kann über das Makro
-// ```OVERRIDE_BYTESEQUENZ_SERIALIZATION(STRUCTURE, INSERT_LOGIK, EXTRACT_LOGIK)``` angestellt werden
-// die Klassen attribute müssen über member. angesprochen werden und beim Aufruf von Extract/Insert muss invertiert zum insert der Extract
-// erfolgen
+// For the following byte sequence, `extract` and `insert` are called recursively until the extracted members have static sizes
+// and are then inserted or removed via `memcopy`
+// This allows any structure, e.g., `vector<vector<vector<vector<int>>>>`, to be inserted or extracted as long as the behavior is defined for `vector`
+// Additionally, for custom classes, the processing of class members with dynamic attributes
+// can be adapted to a sequential call sequence using custom insert/extract logic
+// Standard types such as std::vector or std::map can be accessed
+// Logic for these is already implemented
+// This logic definition or overriding of the standard behavior can be set via the macro
+// ```OVERRIDE_BYTESEQUENZ_SERIALIZATION(STRUCTURE, INSERT_LOGIC, EXTRACT_LOGIC)```
+// Class attributes must be accessed via `member.`, and when calling Extract/Insert, the Extract must be performed in the reverse order of the Insert
+//
 //
 // ```c++
 // struct A{int b; char c;};
@@ -125,8 +180,8 @@ struct hasToByteSequence<T, std::void_t<
 //    extractMultiple(member.c, member.b))
 // ```
 // 
-// Wenn die Klasse selbst deklariert wird und auch private Attribute befüllt werden sollen
-// kann die Serialisierung auch direkt in der Klassen Deklaration erfolgen
+// If the class is declared directly and private attributes need to be initialized as well,
+// serialization can also be performed directly within the class declaration
 //
 // ```c++
 // struct A{
@@ -148,9 +203,9 @@ struct hasToByteSequence<T, std::void_t<
 // };
 // ```
 // 
-// Eine Weitere Möglichkeit für die Serialisierung ist das schreiben von Klassen externen Serialisierungsfunktionen
-// Das bietet sich an wenn es aufgrund vieler typedefs bei den insert/extract template overrides zu Konflikten kommmt
-// Grundsätzlich bieten sich die Serialisierungsfunktionen für größere und komplexere Deklarationen an
+// Another option for serialization is to write external serialization functions for classes
+// This is useful when conflicts arise in the insert/extract template overrides due to numerous typedefs
+// In general, serialization functions are recommended for larger and more complex declarations
 // 
 // ```c++
 // struct A{ ... };
@@ -167,34 +222,30 @@ struct hasToByteSequence<T, std::void_t<
 // }
 // ```
 //
-// für typen die ausschließlich von standardtypen, deren vektoren oder maps oder anderen bereits serialisierten typen abhängig
-// kann die Funktion die Serialisierung über pfr selbst übernehmen
-// Damit lassen vor allem die meisten selbstgeschriebenen Objekte ohne weitere Deklarationen nutzen
-// Ausnahmen sind komplexe selbst allokierende Objekte wie Symengine- oder Eigen Matritzen
-// Sind die jedoch serialisiert können sie jedoch einfach als öffentliche Attribute von eigenen Klassen, vektoren, maps, etc verwendet werden
-// und im Hintergrund automatisch über die pfr Entpackung weitergeleitet bzw. an den rekursiven Aufruf übergeben werden.
+// For types that depend exclusively on standard types, their vectors, maps, or other already serialized types
+// the function can handle serialization via pfr itself
+// This allows most custom objects to be used without further declarations
+// Exceptions are complex, self-allocating objects such as Symengine or Eigen matrices
+// However, once serialized, they can simply be used as public attributes of custom classes, vectors, maps, etc.
+// and automatically passed on in the background via PFR unpacking or handed over to the recursive call.
 //
-// PFR erkennt bei Structs automatisch deren öffentliche Felder, entpackt sie
-// und übergibt sie direkt an gewünschte Funktion, hier Rekursion bzw. Serialisierung.
-//
-// Hierbei muss beachtet werden, dass pfr und die automatische Serialierung NUR für öffentliche Attribute funktioniert
-// alles andere muss über eine Memberfunktion to und fromByteSequnece geregelt werden.
-// 
-// dabei kann auf sämtliche funktionen der ByteSequenz zugegriffen werden
-// zb. über eine Klassen interne Verschlüsselung oder ähnliches
-//
-// Grundsätzlich muss bei der Implementierung einer Serialisierungen beachtet werden, dass die insert Reihenfolge umgekehrt zur
-// extract Reihenfolge ist
-//
-// Ohne die Umkehrung der Reihenfolge beim extract kommt es zu undefiniertem Verhalten 
+// For structs, PFR automatically detects their public fields, unpacks them
+// and passes them directly to the desired function, in this case recursion or serialization.
+// Note that PFR and automatic serialization work ONLY for public attributes
+// and there may be issues with defined constructors. These cases must be handled via explicit serialization.
+// All functions of the ByteSequence can be accessed
+// e.g., via a class-internal encryption or similar
+// When implementing serialization, it is essential to note that the insert order must be specified in reverse of
+// the extract order. If the same order is to be specified for both insert and extract, the extractMultipleReversed function
+// must be used
 struct ByteSequence{
 
-    // Eigentlicher Container für die Daten
-    // in diesem Vektor steht die ByteSequenz und der gesamte struct enthält nur ein paar wrapper funktionen
-    // die converts, inserts, extracts und weiteres erlauben
+    // Actual container for the data
+    // This vector holds the byte sequence, and the entire struct contains only a few wrapper functions
+    // that allow for conversion, insertion, extraction, and other operations
     std::vector<Byte> bytes = {};
     
-    // Print der Sequenz, unsichtbare chars werden nicht angezeigt
+    // Print the sequence; invisible characters are not displayed
     friend std::ostream& operator<<(std::ostream& os, const ByteSequence& sequence) {
         
         //
@@ -211,28 +262,28 @@ struct ByteSequence{
         return os;
     }
 
-    // Größe der Sequenz
+    // Size of the Sequence
     size_t size(){
         
         return bytes.size();
     }
 
-    // einfacher convert über Konstruktor
+    // Simple conversion via the constructor
     std::string toString(){
 
         return std::string(bytes.begin(), bytes.end());
     }
 
-    // einfacher convert über Konstruktor
+    // Simple conversion via the constructor
     void fromString(const std::string& str){
 
         bytes = std::vector<Byte>(str.begin(), str.end());
     }
 
-    // abspeichern in File
+    // Save in file
     void toFile(const std::string& file){
 
-        // Parent erstellen wenn nicht vorhanden
+        // Create parent if it doesn't exist
         fs::create_directories(fs::path(file).parent_path());
 
         //
@@ -245,7 +296,7 @@ struct ByteSequence{
         }
     }
 
-    // Laden aus file
+    // Load from file
     void fromFile(const std::string& file){
 
         std::ifstream inFile(file, std::ios::binary);
@@ -260,7 +311,7 @@ struct ByteSequence{
         }
     }
 
-    // Insert mit memcopy der gesamten Inhalt statischer Member in den bytevektor anstellt
+    // Performs an insert operation using memcopy to copy the entire contents of a static member into the byte vector
     template<typename T>
     void insertStaticMember(const T& member){
 
@@ -272,24 +323,24 @@ struct ByteSequence{
         std::memcpy(bytes.data() + sequenceSize, &member, sizeof(T));
     }
 
-    // Extract mit memcopy der Inhalt in Größe des statischen Members aus byteVektor in Member kopiert und aus
-    // dem Vektor löscht
+    // Extract, uses memcopy to copy the contents of the byte vector, up to the size of the static member, into the member and then
+    // deletes them from the vector
     template<typename T>
     void extractStaticMember(T& member){
 
-        // Prüfen ob sequenz noch genug bytes enthält um den member zu füllen
+        // Check whether the sequence still contains enough bytes to fill the member
         if(G_BYTESEQ_ASSERT_HANDLER != nullptr && bytes.size() < sizeof(T)){
 
-            (*G_BYTESEQ_ASSERT_HANDLER)("Byte Sequenz enthält nicht genügend Bytes für Extraction");
+            (*G_BYTESEQ_ASSERT_HANDLER)("The byte sequence does not contain enough bytes for extraction");
             return;
         }
         else if(bytes.size() < sizeof(T)){
 
-            std::cout << "Byte Sequenz enthält nicht genügend bytes für Extraction" << std::endl;
+            std::cout << "The byte sequence does not contain enough bytes for extraction" << std::endl;
             return;
         }
 
-        // Sequence Größe cachen und Memcopy von byteVector in referenzierten Member
+        // Cache sequence size and copy byteVector to a referenced member
         const size_t sequenceSize = bytes.size() - sizeof(T);
 
         //
@@ -299,70 +350,22 @@ struct ByteSequence{
         bytes.resize(sequenceSize);
     }
 
-    // rekursiver Wrapper der so lange rekursiv die jeweils untergeordnete insert Funktion aufruft bis
-    // bis der finale insert über einen statischen Member erfolgen kann
+    // Recursive wrapper that recursively calls the respective nested insert function until
+    // the final insert can be performed via a static member
     template<typename T>
     void insert(const T& member){
 
-        if constexpr(IsInstanceOf<T, std::vector>::value){
+        if constexpr (hasToByteSequenceAttrib<T>::value) {
 
-            // Rückwärts damit Reihenfolge des herausgezogenen Vektors identisch mit der des Ursprungsvektors wird
-            // normalerweise wird die Reihenfolge beim insert invertiert, da immmer von hinten in den Vector geschrieben und
-            // auch von hinten extrahiert wird 
-            for (auto it = member.rbegin(); it != member.rend(); ++it) {
-                insert(*it);
-            }
-
-            // Wichtig damit beim Extract klar ist wie viele Elemente für den Vector in die ByteSequenz gepusht wurden
-            insert(member.size());
-        }
-        else if constexpr(IsInstanceOf<T, std::map>::value){
-
-            //
-            for(auto it = member.rbegin(); it != member.rend(); ++it){
-                insertMultiple(it->second, it->first);
-            }
-
-            //
-            insert(member.size());
-        }
-        // Bei der unordered Map wird die Reihenfolge durch das cachen nicht aufrechterhalten
-        else if constexpr(IsInstanceOf<T, std::unordered_map>::value){
-
-            //
-            for(const auto& [key,val] : member){
-                insertMultiple(val, key);
-            }
-
-            //
-            insert(member.size());
-        }
-        else if constexpr(std::is_same_v<T, std::string>){
-
-            //
-            for (auto it = member.rbegin(); it != member.rend(); ++it) {
-                insert(*it);
-            }
-            insert(member.size());
-        }
-        //
-        else if constexpr (std::is_same_v<T, char*> || std::is_same_v<T, const char*> ||
-                            (std::is_array_v<T> && std::is_same_v<std::remove_extent_t<T>, char>)){
-
-            //
-            insert(std::string(member));
-        }
-        else if constexpr (hasToByteSequenceAttrib<T>::value) {
-
-            // member funktion aufrufen und bytesequenz als referenz übergeben
+            // Call the member function and pass the byte sequence by reference
             member.toByteSequence(*this);
         }
         else if constexpr (hasToByteSequence<T>::value){
 
             toByteSequence(member, *this);
         }
-        // Aufruf des inserts für statische member weil Typ zu den Standardgrößen mit statischer Speichergröße zählt
-        // oder aus anderen Gründen eine statische Speicher größe aufweist
+        // Call the `insert` function for static members because the type is one of the standard sizes with a static memory size
+        // or has a static memory size for other reasons
         else if constexpr(std::is_fundamental<T>::value ||
             std::is_trivially_copyable<T>::value && std::is_standard_layout<T>::value){
                                                             
@@ -377,63 +380,29 @@ struct ByteSequence{
             // index für pfr feld Liste extrahieren
             [this, &memberAsTuple]<std::size_t... Is>(std::index_sequence<Is...>) {
 
-                // Laufvariable Is läuft von vorne nach hinten
-                // >> invert über
+                // The loop variable Is runs from front to back
+                // >> reverse over
                 (..., insert(std::get<nFields - 1 - Is>(memberAsTuple)));
             }(std::make_index_sequence<nFields>{});
         }
     }
 
-    // rekursiver Wrapper der so lange rekursiv die jeweils untergeordnete extract Funktion aufruft bis
-    // bis der finale extract über einen statischen Member erfolgen kann 
+    // Recursive wrapper that recursively calls the respective nested `extract` function until
+    // the final `extract` can be performed via a static member 
     template<typename T>
     void extract(T& member){
 
-        if constexpr(IsInstanceOf<T, std::vector>::value){
-
-            size_t vectorSize = get<size_t>();
-            member.clear();
-            member.resize(vectorSize);
-
-            for(size_t counter = 0; counter < vectorSize; counter++){
-                extract(member[counter]);
-            }
-        }
-        else if constexpr(IsInstanceOf<T, std::map>::value || IsInstanceOf<T, std::unordered_map>::value){
-
-            size_t mapSize = get<size_t>();
-            member.clear();
-            
-            for(size_t counter = 0; counter < mapSize; counter++){
-
-                const typename T::key_type key = get<typename T::key_type>();
-                member.try_emplace(key);
-
-                extract(member[key]);
-            }
-        }
-        else if constexpr(std::is_same_v<T, std::string>){
-
-            size_t stringSize = get<size_t>();
-            member.resize(stringSize);
+        if constexpr (hasFromByteSequenceAttrib<T>::value) {
 
             //
-            for (size_t counter = 0; counter < stringSize; counter++) {
-                extract(member[counter]);
-            }
-        }
-        // member funktion aufrufen und bytesequenz als referenz übergeben
-        else if constexpr (hasFromByteSequenceAttrib<T>::value) {
-
-            // member funktion aufrufen und bytesequenz als referenz übergeben
             member.fromByteSequence(*this);
         }
         else if constexpr (hasFromByteSequence<T>::value){
 
             fromByteSequence(member, *this);
         }
-        // Aufruf des inserts für statische member weil Typ zu den Standardgrößen mit statischer Speichergröße zählt
-        // oder aus anderen Gründen eine statische Speicher größe aufweist
+        // Call the `extract` function for static members because the type is one of the standard sizes with a static memory size
+        // or has a static memory size for other reasons
         else if constexpr(std::is_fundamental<T>::value ||
             std::is_trivially_copyable<T>::value && std::is_standard_layout<T>::value){
                                                             
@@ -447,7 +416,7 @@ struct ByteSequence{
         }
     }
 
-    // Wrapper der insert für eine Member liste aufruft
+    // Wrapper that calls `insert` for a member list
     template<typename... Ts>
     void insertMultiple(const Ts&... members) {
 
@@ -455,7 +424,7 @@ struct ByteSequence{
         (insert(members), ...);
     }
 
-    // Wrapper der extract für eine Member liste aufruft
+    // Wrapper that calls `extract` for a member list
     template<typename... Ts>
     void extractMultiple(Ts&... members){
 
@@ -463,6 +432,7 @@ struct ByteSequence{
         (extract(members), ...);
     }
 
+    // Wrapper that calls `extract` reversed for a member list
     template <typename... Ts>
     void extractMultipleReversed(Ts&... members) {
         
@@ -475,11 +445,11 @@ struct ByteSequence{
     }
 
     // # Shiffre Encoder
-    // Codierung über einfache shiffre, also Tokenverschiebung
-    // da die höher wertigen bytes beim string convert teilweise
-    // für charfolgen und nicht mehr einzelne chars stehen
-    // wird der erzeugt string häufig größer als der string für den eigentlichen Vektor
-    // >> ineffizient bei Speicherung und wenig sicher
+    // Encoding using a simple shiffre, i.e., token shifting
+    // Since the higher-order bytes in the string conversion sometimes
+    // represent character sequences rather than individual characters,
+    // the resulting string is often larger than the string for the actual vector
+    // >> inefficient for storage and not very secure
     void encode(const int& shiffreKey){
 
         for(uint8_t& byte : bytes){
@@ -494,14 +464,14 @@ struct ByteSequence{
     }
 
     // # XOR Encoder
-    // nimmt eine Bytefolge und verodert jeden nten char aus der sequenz
-    // mit dem nten char aus dem key
-    // Für das verodern wird xor (exkludierendes oder, operator^) verwendet
-    // dieses ist reversible
-    // also a* = a ^ b --> a = a* ^ b
-    // Deshalb kann ein mit dieser Codierung verschlüsselter Bytestream
-    // über den erneuten aufruf der Codierungsfunktion decodiert werden
-    // wichtig ist dabei nur, dass der Schlüssel der gleiche ist 
+    // Takes a byte sequence and XORs every nth character in the sequence
+    // with the nth character in the key
+    // The XOR (exclusive OR, operator^) is used for this operation
+    // This is reversible
+    // i.e., a * = a ^ b --> a = a * ^ b
+    // Therefore, a byte stream encrypted with this encoding
+    // can be decoded by calling the encoding function again
+    // The only important thing is that the key remains the same 
     void encode(const uint8_t* key, size_t key_len) {
         for (size_t i = 0; i < bytes.size(); ++i) {
             bytes[i] ^= key[i % key_len];
@@ -512,12 +482,15 @@ struct ByteSequence{
         encode(key, key_len);
     }
 
-    // # String Wrapper für Xor Encoder
-    // nimmt string und wandelt ihn in bytefolge für xor encoder um
+    // # String wrapper for XOR encoder
+    // Takes a string and converts it into a byte sequence for the XOR encoder
     void encode(const std::string& key) {
 
         encode(reinterpret_cast<const uint8_t*>(key.data()), key.size());
     }
+
+    // # String wrapper for XOR encoder
+    // Takes a string and converts it into a byte sequence for the XOR encoder
     void decode(const std::string& key) {
 
         encode(key);
@@ -551,3 +524,161 @@ struct ByteSequence{
         return member;
     }
 };
+
+// ByteSequence already comes with a basic selection of implemented serialized dynamic containers
+
+// Vektor
+template<typename T>
+inline void toByteSequence(const std::vector<T>& member, ByteSequence& seq) {
+
+    for (auto it = member.rbegin(); it != member.rend(); ++it) {
+
+        seq.insert(*it);
+    }
+
+    seq.insert(member.size());
+}
+
+template<typename T>
+inline void fromByteSequence(std::vector<T>& member, ByteSequence& seq) {
+
+    size_t size = seq.get<size_t>();
+
+    member.resize(size);
+    for (size_t i = 0; i < size; i++) {
+
+        member[i] = seq.get<T>();
+    }
+}
+
+// map
+template<typename Key, typename Val>
+inline void toByteSequence(const std::map<Key, Val>& member, ByteSequence& seq) {
+
+    for (auto it = member.rbegin(); it != member.rend(); ++it) {
+
+        seq.insertMultiple(it->second, it->first);
+    }
+
+    seq.insert(member.size());
+}
+
+template<typename Key, typename Val>
+inline void fromByteSequence(std::map<Key, Val>& member, ByteSequence& seq) {
+
+    size_t size = seq.get<size_t>();
+
+    for (size_t i = 0; i < size; i++) {
+
+        Key key; Val val;
+        
+        seq.extractMultipleReversed(val, key);
+        member.emplace(key, val);
+    }
+}
+
+// unordered_map
+template<typename Key, typename Val>
+inline void toByteSequence(const std::unordered_map<Key, Val>& member, ByteSequence& seq) {
+
+    for (const auto& [key, val] : member) {
+
+        seq.insertMultiple(val, key);
+    }
+
+    seq.insert(member.size());
+}
+
+template<typename Key, typename Val>
+inline void fromByteSequence(std::unordered_map<Key, Val>& member, ByteSequence& seq) {
+
+    size_t size = seq.get<size_t>();
+
+    for (size_t i = 0; i < size; i++) {
+
+        Key key; Val val;
+
+        seq.extractMultipleReversed(val, key);
+        member.emplace(key, val);
+    }
+}
+
+// multimap
+template<typename Key, typename Val>
+inline void toByteSequence(const std::multimap<Key, Val>& member, ByteSequence& seq) {
+
+    for (auto it = member.rbegin(); it != member.rend(); ++it) {
+
+        seq.insertMultiple(it->second, it->first);
+    }
+
+    seq.insert(member.size());
+}
+
+template<typename Key, typename Val>
+inline void fromByteSequence(std::multimap<Key, Val>& member, ByteSequence& seq) {
+
+    size_t size = seq.get<size_t>();
+
+    for (size_t i = 0; i < size; i++) {
+
+        Key key; Val val;
+
+        seq.extractMultipleReversed(val, key);
+        member.emplace(key, val);
+    }
+}
+
+// Pair
+template<typename First, typename Second>
+inline void toByteSequence(const std::pair<First, Second>& member, ByteSequence& seq) {
+
+    seq.insertMultiple(member.first, member.second);
+}
+
+template<typename First, typename Second>
+inline void fromByteSequence(std::pair<First, Second>& member, ByteSequence& seq) {
+
+    seq.extractMultipleReversed(member.first, member.second);
+}
+
+// string
+inline void toByteSequence(const std::string& member, ByteSequence& seq) {
+
+    for (auto it = member.rbegin(); it != member.rend(); ++it) {
+
+        seq.insert(*it);
+    }
+
+    seq.insert(member.size());
+}
+
+inline void fromByteSequence(std::string& member, ByteSequence& seq) {
+
+    size_t size = seq.get<size_t>();
+
+    member.resize(size);
+    for (size_t i = 0; i < size; i++) {
+
+        member[i] = seq.get<char>();
+    }
+}
+
+// const char*
+inline void toByteSequence(const char* member, ByteSequence& seq) {
+
+    seq.insert(std::string(member));
+}
+
+// char*
+inline void toByteSequence(char* member, ByteSequence& seq) {
+
+    seq.insert(std::string(member));
+}
+
+// char[]
+template<size_t N>
+inline void toByteSequence(const char (&member)[N], ByteSequence& seq) {
+
+    seq.insert(std::string(member, N - 1));
+}
