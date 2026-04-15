@@ -13,7 +13,7 @@ Der Fokus liegt dabei auf der generischer Serialisierung (nutzt boost::pfr), der
 - Compiler : gcc/g++
 - Plattform : Windows
 
-(Anderweitig nicht getestet)
+Lib wurde bisher nicht anderweitig getestet
 
 # 🚀 SetUp
 
@@ -36,7 +36,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/ByteSequence")
 - Lazy Syntax `operator +=` / `operator -=`
 - Datei-I/O: `toFile`, `fromFile`
 - String-I/O: `toString`, `fromString`
-- XOR-Encoder : `encode(std::string)`, `encode(std::string)`
+- XOR-Encoder : `encode(std::string)`, `decode(std::string)`
 
 # 🏗️ Unterstützung
 

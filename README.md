@@ -13,7 +13,7 @@ The focus is on generic serialization (using boost::pfr), the recursive decompos
 - Compiler: gcc/g++
 - Platform: Windows
 
-(Not tested on other platforms)
+Lib has not been tested in any other way so far
 
 # 🚀 Setup
 
@@ -36,7 +36,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/ByteSequence")
 - Lazy Syntax `operator +=` / `operator -=`
 - file-I/O: `toFile`, `fromFile`
 - string-I/O: `toString`, `fromString`
-- XOR-Encoder : `encode(std::string)`, `encode(std::string)`
+- XOR-Encoder : `encode(std::string)`, `decode(std::string)`
 
 # 🏗️ Support
 
