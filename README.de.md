@@ -5,7 +5,7 @@
 
 # ByteSequence
 
-ByteSequence ist eine Single-Header-Lib für binäre Objekt-Serialisierung. ByteSequence implementiert Bytestreams, in die Objekt geschoben und aus denen Objekte entnommen werden können. 
+ByteSequence ist eine Single-Header-Lib für binäre Objekt-Serialisierung. ByteSequence implementiert Bytestreams, in die Objekte geschoben und aus denen Objekte entnommen werden können. 
 Der Fokus liegt dabei auf der generischer Serialisierung (nutzt boost::pfr), der rekursiven Zerlegung dynamischer Container (std::vector, std::map, ...) und einer minimalistischen Syntax.
 
 # 🧬 Anforderungen
