@@ -61,7 +61,7 @@ ByteSequence bs;
 int b, a = 42; double d, c = 3.14;
 
 bs.insertMultiple(a, c);
-bs.extractMultiple(b, d);
+bs.extractMultipleReversed(b, d);
 ```
 
 In addition, struct members and class members of fully public classes can be copied. The attributes are parsed by `boost::pfr` and inserted recursively. 
@@ -120,6 +120,18 @@ inline void toByteSequence(const std::vector<T>& member, ByteSequence& seq) {
     }
 
     seq.insert(member.size());
+}
+
+template<typename T>
+inline void fromByteSequence(std::vector<T>& member, ByteSequence& seq) {
+
+    size_t size = seq.get<size_t>();
+
+    member.resize(size);
+    for (size_t i = 0; i < size; i++) {
+
+        member[i] = seq.get<T>();
+    }
 }
 ```
 
