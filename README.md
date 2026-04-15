@@ -75,7 +75,7 @@ Whatever b, a; a.m_intVecs =  = {{{1,2,3}, {4,5,6}}};
 bs += a;
 bs -= b;
 ```
-Über den XOR-Encoder können ByteSequences verschlüsselt und entschlüsselt werden.
+With the XOR encoder ByteSequences can be encoded and decoded.
 
 ```cpp
 ByteSequence bs;
