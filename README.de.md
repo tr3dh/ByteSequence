@@ -129,14 +129,13 @@ inline void toByteSequence(const std::vector<T>& member, ByteSequence& seq) {
 ByteSequence bs;
 bs.insert(data);
 
-// In Datei schreiben
 bs.toFile("path/to/cache.bin");
 
-// Aus Datei lesen
 ByteSequence cachedBS;
 cachedBS.fromFile("path/to/cache.bin");
 
-auto restored = loaded.get<MyType>();
+auto restoredData = cachedBS.get<...>();
+
 ```
 # 📊 Limitierungen / Hinweise
 

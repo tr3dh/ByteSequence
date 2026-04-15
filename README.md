@@ -134,7 +134,7 @@ bs.toFile("path/to/cache.bin");
 ByteSequence cachedBS;
 cachedBS.fromFile("path/to/cache.bin");
 
-auto restored = loaded.get<MyType>();
+auto restoredData = cachedBS.get<...>();
 ```
 
 # 📊 Limitations / Notes
