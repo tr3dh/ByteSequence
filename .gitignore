@@ -35,8 +35,8 @@ tmp/
 bin/
 
 #
-Import/juliaScripts/*
-Import/!juliaScripts/.gitignore
+Examples/juliaScripts/*
+Examples/!juliaScripts/.gitignore
 
 # Os Dateien
 .DS_Store
