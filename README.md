@@ -18,11 +18,14 @@ Lib has not been tested in any other way so far
 # 🚀 Setup
 
 - Clone ByteSequence into the project
-- Obtain the Boost.PFR dependency or have CMake automatically set it up using `add_subdirectory`
+- Obtain the Boost.PFR dependency or have CMake automatically set it up using `add_subdirectory` and linking it
 
 ```bash
 git clone https://github.com/tr3dh/ByteSequence.git src
+
+# In own CMakeLists.txt
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/ByteSequence")
+target_link_libraries(... ... ByteSequence)
 ```
 - include Header
 
